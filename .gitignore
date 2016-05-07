@@ -13,3 +13,4 @@ _mailinglist
 .idea/
 sqlite.exe
 formdata.db
+appconfig.py

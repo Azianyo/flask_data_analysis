@@ -1,12 +1,22 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, flash, redirect, render_template, \
+     request, url_for
+app = Flask(__name__)
+import appconfig
+app.secret_key = appconfig.SECRET_KEY
+
 from flask_sqlalchemy import SQLAlchemy
+
+from flask_wtf import Form
+from wtforms import DecimalField
+from wtforms.validators import DataRequired
+
+
 from datetime import datetime
 import statistics
 
-app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///formdata.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = 'True'
+app.sqlalchemy_database_uri= appconfig.SQLALCHEMY_DATABASE_URI
+app.sqlalchemy_track_modifications = appconfig.SQLALCHEMY_TRACK_MODIFICATIONS
 
 db = SQLAlchemy(app)
 
@@ -33,6 +43,8 @@ class Formdata(db.Model):
 
 db.create_all()
 
+class DataForm(Form):
+    number_of_records = DecimalField('Number of records:', validators=[DataRequired()])
 
 @app.route("/")
 def welcome():
@@ -41,6 +53,15 @@ def welcome():
 @app.route("/form")
 def show_form():
     return render_template('form.html')
+
+@app.route("/dataform", methods=['GET', 'POST'])
+def data_form():
+    form = DataForm()
+    if form.validate_on_submit():
+        flash("Validation successful")
+        return redirect('/result')
+    return render_template("data_form.html", form=form)
+
 
 @app.route("/raw")
 def show_raw():

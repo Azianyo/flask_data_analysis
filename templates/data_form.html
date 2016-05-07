@@ -1,1 +1,16 @@
-Hi
+{% extends "base.html" %}
+
+{% block content %}
+
+<form role="form" method="POST" action="/dataform">
+    <h3>{{ form.hidden_tag() }}</h3>
+    <div class="form-group">
+      {{ form.number_of_records.label }} {{ form.number_of_records(class_="form-control") }}
+      {% for error in form.number_of_records.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}<br>
+      <button type="submit" class="btn btn-default">Go</button>
+    </div>
+</form>
+
+{% endblock %}
