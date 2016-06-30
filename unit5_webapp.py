@@ -17,7 +17,6 @@ import pycountry
 # import matplotlib.pyplot as plt
 
 from datetime import datetime
-import statistics
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.sqlalchemy_database_uri= appconfig.SQLALCHEMY_DATABASE_URI
