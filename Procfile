@@ -1,1 +1,1 @@
-web: gunicorn unit5_webapp:app --log-file -
+web: gunicorn unit5_webapp:app --timeout 800 --log-file -
