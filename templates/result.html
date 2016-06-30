@@ -2,25 +2,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<div class="page-header">
-    <h1>Results</h1>
-    <div id="chart_div"></div>
-</div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-  google.load('visualization', '1', {'packages':['corechart']});
-  google.setOnLoadCallback(drawChart);
-  function drawChart() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Question');
-    data.addColumn('number', 'Average answer');
-    data.addRows( {{ data|tojson }} );
-    var chart = new google.visualization.ColumnChart(
-            document.getElementById('chart_div'));
-    chart.draw(data, {legend: 'none', vAxis: {baseline: 0} });
-  }
-</script>
+<title>{{chart_title}}</title>
+<h1>{{chart_title}}</h1>
+<div class="container" id="chart_container"></div>
+   <script>
+     //basic map config with custom fills, mercator projection
+     function cases_value(data){
+       if(data != null){
+         return data.value;
+       }
+       else{
+         return "not known";
+       }
+
+     }
+
+     var map = new Datamap({
+        scope: 'world',
+        element: document.getElementById('chart_container'),
+        projection: 'mercator',
+        height: 700,
+        width: 1000,
+        highlightOnHover: true,
+        highlightFillColor: '#ffff00',
+        geographyConfig:{
+            popupTemplate: function(geography, data) { //this function should just return a string
+                return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong><br>' + 'cases:' + cases_value(data) + ' '
+            }
+        },
+        fills: {
+            'A': '#8e3222',
+            'B': '#a33927',
+            'C': '#b7402c',
+            'D': '#cc4731',
+            'E': '#d25844',
+            'F': '#dc7d6d',
+            'G': '#6ddc7d',
+            'H': '#59d76b',
+            'I': '#31cc47',
+            'J': '#2cb740',
+            'K': 'pink',
+            'L': 'orange',
+            'M': 'blue',
+            defaultFill: '#000000'
+        },
+        data: {
+              {% for row in values_color_data.iterrows() %}
+                  {{row[1]["Country"]}}: {"fillKey": "{{row[1]["Colors"]}}", "value": {{row[1]["value"]}} },
+              {% endfor %}
+        }
+     })
+     map.updateChoropleth({
+         {%  for row in color_data.iterrows() %}
+             {{row[1]["Country"]}}: {"fillKey": {{row[1]["Colors"]}}},
+         {% endfor %}
+     });
+   </script>
+</div>
 
 {% endblock %}

@@ -1,8 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
-<form role="form" method="POST" action="/dataform">
+<label>Choose the parameters for analysis:</label>
+<br>
+<form action="/result" method="POST">
+    <select class= "form-control" name="parameter_name">
+          <option selected value="Cumulative number of probable Ebola cases">Cumulative number of probable Ebola cases</option>
+          <option selected value="Cumulative number of suspected Ebola cases">Cumulative number of suspected Ebola cases</option>
+          <option selected value="Cumulative number of confirmed, probable and suspected Ebola cases">Cumulative number of confirmed, probable and suspected Ebola cases</option>
+          <option selected value="Cumulative number of confirmed Ebola cases">Cumulative number of confirmed Ebola cases</option>
+    </select>
+    <input type="text" name="daterange" value="01/01/2015 - 01/31/2015" />
+    <input type="submit" class="btn btn-default" value="Choose">
+</form>
+
+<script>
+  $('input[name="daterange"]').daterangepicker(
+  {
+      locale: {
+        format: 'YYYY-MM-DD'
+      },
+      startDate: '2014-08-29',
+      endDate: '2016-03-23',
+      minDate: "2014-08-29",
+      maxDate: "2016-03-23"
+  },
+  function(start, end, label) {
+      alert("A new date range was chosen: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+</script>
+
+<!-- <form role="form" method="POST" action="/dataform">
     <h3>{{ form.hidden_tag() }}</h3>
     <div class="form-group">
       {{ form.number_of_records.label }} {{ form.number_of_records(class_="form-control") }}
@@ -11,6 +43,6 @@
       {% endfor %}<br>
       <button type="submit" class="btn btn-default">Go</button>
     </div>
-</form>
+</form> -->
 
 {% endblock %}

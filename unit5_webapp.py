@@ -1,5 +1,6 @@
 from flask import Flask, flash, redirect, render_template, \
      request, url_for
+
 app = Flask(__name__)
 import appconfig
 app.secret_key = appconfig.SECRET_KEY
@@ -10,6 +11,11 @@ from flask_wtf import Form
 from wtforms import DecimalField
 from wtforms.validators import DataRequired
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import pycountry
+# import matplotlib.pyplot as plt
 
 from datetime import datetime
 import statistics
@@ -19,27 +25,6 @@ app.sqlalchemy_database_uri= appconfig.SQLALCHEMY_DATABASE_URI
 app.sqlalchemy_track_modifications = appconfig.SQLALCHEMY_TRACK_MODIFICATIONS
 
 db = SQLAlchemy(app)
-
-class Formdata(db.Model):
-    __tablename__ = 'formdata'
-    id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    firstname = db.Column(db.String, nullable=False)
-    email = db.Column(db.String)
-    age = db.Column(db.Integer)
-    income = db.Column(db.Integer)
-    satisfaction = db.Column(db.Integer)
-    q1 = db.Column(db.Integer)
-    q2 = db.Column(db.Integer)
-
-    def __init__(self, firstname, email, age, income, satisfaction, q1, q2):
-        self.firstname = firstname
-        self.email = email
-        self.age = age
-        self.income = income
-        self.satisfaction = satisfaction
-        self.q1 = q1
-        self.q2 = q2
 
 db.create_all()
 
@@ -62,64 +47,100 @@ def data_form():
         return redirect('/result')
     return render_template("data_form.html", form=form)
 
-
-@app.route("/raw")
-def show_raw():
-    fd = db.session.query(Formdata).all()
-    return render_template('raw.html', formdata=fd)
-
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 @app.route("/result")
 def show_result():
-    fd_list = db.session.query(Formdata).all()
+    df = pd.read_excel('ebola_data_db_format.xlsx')
+    df = df[df["Country"].map(lambda x: x.find("2") == -1)]
 
-    # Some simple statistics for sample questions
-    satisfaction = []
-    q1 = []
-    q2 = []
-    for el in fd_list:
-        satisfaction.append(int(el.satisfaction))
-        q1.append(int(el.q1))
-        q2.append(int(el.q2))
+    colors = []
+    for index, row in df.iterrows():
+        if row["Country"] == "United States of America":
+            row["Country"] = "United States"
+        df.loc[index, 'Country'] = pycountry.countries.get(name=row["Country"]).alpha3
+        if row["value"] > 10000:
+            colors.append('A')
+        elif row["value"] > 9000:
+            colors.append('B')
+        elif row["value"] > 8000:
+            colors.append('C')
+        elif row["value"] > 7000:
+            colors.append('D')
+        elif row["value"] > 6000:
+            colors.append('E')
+        elif row["value"] > 5000:
+            colors.append('F')
+        elif row["value"] > 4000:
+            colors.append('G')
+        elif row["value"] > 3000:
+            colors.append('H')
+        elif row["value"] > 2000:
+            colors.append('I')
+        elif row["value"] > 1000:
+            colors.append('J')
+        elif row["value"] > 100:
+            colors.append('K')
+        elif row["value"] > 0:
+            colors.append('L')
+        elif row["value"] == 0:
+            colors.append('M')
+        else:
+            colors.append('Error')
+    df["Colors"] = colors
+    filtered_df = df[df["Indicator"]=="Cumulative number of confirmed Ebola cases"]
+    values_color_data = filtered_df[['Country', 'Colors', 'value']]
+    color_data = filtered_df[['Country', 'Colors']]
+    return render_template('result.html', values_color_data=values_color_data, color_data=color_data, chart_title="Cumulative number of confirmed Ebola cases")
 
-    if len(satisfaction) > 0:
-        mean_satisfaction = statistics.mean(satisfaction)
-    else:
-        mean_satisfaction = 0
+@app.route('/result', methods=['POST'])
+def show_result_post():
+    df = pd.read_excel('ebola_data_db_format.xlsx')
+    df = df[df["Indicator"]==request.form['parameter_name']]
+    date_range = request.form["daterange"].split(" - ")
+    date_range = list(map(lambda x: x.replace("-", ""), date_range))
+    df = df[(df['Date'] >= date_range[0]) & (df['Date'] <= date_range[1])]
+    df = df[df["Country"].map(lambda x: x.find("2") == -1)]
 
-    if len(q1) > 0:
-        mean_q1 = statistics.mean(q1)
-    else:
-        mean_q1 = 0
-
-    if len(q2) > 0:
-        mean_q2 = statistics.mean(q2)
-    else:
-        mean_q2 = 0
-
-    # Prepare data for google charts
-    data = [['Satisfaction', mean_satisfaction], ['Python skill', mean_q1], ['Flask skill', mean_q2]]
-
-    return render_template('result.html', data=data)
-
-
-@app.route("/save", methods=['POST'])
-def save():
-    # Get data from FORM
-    firstname = request.form['firstname']
-    email = request.form['email']
-    age = request.form['age']
-    income = request.form['income']
-    satisfaction = request.form['satisfaction']
-    q1 = request.form['q1']
-    q2 = request.form['q2']
-
-    # Save the data
-    fd = Formdata(firstname, email, age, income, satisfaction, q1, q2)
-    db.session.add(fd)
-    db.session.commit()
-
-    return redirect('/')
+    colors = []
+    for index, row in df.iterrows():
+        if row["Country"] == "United States of America":
+            row["Country"] = "United States"
+        df.loc[index, 'Country'] = pycountry.countries.get(name=row["Country"]).alpha3
+        if row["value"] > 10000:
+            colors.append('A')
+        elif row["value"] > 9000:
+            colors.append('B')
+        elif row["value"] > 8000:
+            colors.append('C')
+        elif row["value"] > 7000:
+            colors.append('D')
+        elif row["value"] > 6000:
+            colors.append('E')
+        elif row["value"] > 5000:
+            colors.append('F')
+        elif row["value"] > 4000:
+            colors.append('G')
+        elif row["value"] > 3000:
+            colors.append('H')
+        elif row["value"] > 2000:
+            colors.append('I')
+        elif row["value"] > 1000:
+            colors.append('J')
+        elif row["value"] > 100:
+            colors.append('K')
+        elif row["value"] > 0:
+            colors.append('L')
+        elif row["value"] == 0:
+            colors.append('M')
+        else:
+            colors.append('Error')
+    df["Colors"] = colors
+    values_data = df[['Country', 'Colors', 'value']]
+    color_data = df[['Country', 'Colors']]
+    return render_template('result.html', values_color_data=values_data, color_data=color_data, chart_title=request.form["parameter_name"])
 
 
 if __name__ == "__main__":

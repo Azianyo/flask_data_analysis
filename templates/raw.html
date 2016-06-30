@@ -10,33 +10,20 @@
 <table class="table">
     <thead>
     <tr>
-        <th>#</th>
-        <th>Created at</th>
-        <th>First Name</th>
-        <th>Email</th>
-        <th>Age</th>
-        <th>Income</th>
-        <th>Satisfaction</th>
-        <th>Python</th>
-        <th>Flask</th>
+      {% for column in formdata.columns %}
+        <th>{{column}}</th>
+      {% endfor %}
     </tr>
     </thead>
 
     <tbody>
-    {% for element in formdata %}
-    <tr>
-        <td>{{ element.id }}</td>
-        <td>{{ element.created_at }}</td>
-        <td>{{ element.firstname }}</td>
-        <td>{{ element.email }}</td>
-        <td>{{ element.age }}</td>
-        <td>{{ element.income }}</td>
-        <td>{{ element.satisfaction }}</td>
-        <td>{{ element.q1 }}</td>
-        <td>{{ element.q2 }}</td>
-
-    </tr>
-    {% endfor %}
+      {% for column in formdata.columns : %}
+        <tr>
+        {% for row in formdata.itertuples(): %}
+          <td>{{row.column}}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
     </tbody>
 </table>
 
