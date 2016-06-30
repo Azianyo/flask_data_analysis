@@ -2,8 +2,8 @@ from flask import Flask, flash, redirect, render_template, \
      request, url_for
 
 app = Flask(__name__)
-import appconfig
-app.secret_key = appconfig.SECRET_KEY
+# import appconfig
+app.secret_key = ENV["SECRET_KEY"]
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -20,8 +20,8 @@ from datetime import datetime
 import statistics
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-app.sqlalchemy_database_uri= appconfig.SQLALCHEMY_DATABASE_URI
-app.sqlalchemy_track_modifications = appconfig.SQLALCHEMY_TRACK_MODIFICATIONS
+app.sqlalchemy_database_uri= ENV["SQLALCHEMY_DATABASE_URI"]
+app.sqlalchemy_track_modifications = ENV["SQLALCHEMY_TRACK_MODIFICATIONS"]
 
 db = SQLAlchemy(app)
 
