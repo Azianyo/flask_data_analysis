@@ -13,7 +13,6 @@ from wtforms.validators import DataRequired
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import pycountry
 # import matplotlib.pyplot as plt
 

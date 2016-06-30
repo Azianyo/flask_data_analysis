@@ -5,7 +5,6 @@ Flask-WTF==0.12
 itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
-matplotlib==1.5.1
 numpy==1.11.0
 pandas==0.18.1
 plotly==1.11.0
